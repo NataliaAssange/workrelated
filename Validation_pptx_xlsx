@@ -1,0 +1,68 @@
+import os
+import re
+from PIL import Image
+from datetime import datetime
+from zipfile import ZipFile
+from openpyxl import load_workbook
+if datetime.now().month==1:
+    year=str(datetime.now().year-1)
+    month1='12'
+else:
+    year = str(datetime.now().year)
+    month = str(datetime.now().month-1)
+    month1=month.zfill(2)
+#解压ppt
+unzip_path = r'your file path here'#这是解压后文件所在的目录
+if not os.path.exists(unzip_path):
+    os.mkdir(unzip_path)
+L1=['CH','JP','AU','US']
+L2=['China','Japan','Australia','America']
+L3=['10','11','9','10']
+for i in range(3):
+    joinpath=r'your file path/your file name '+month1+'_'+year+'_'+L1[i]+' - '+L2[i]+'.pptx'#拼接解压前pptx所在的目录
+    with ZipFile(joinpath) as f:
+        for file in f.namelist():
+            if file.startswith("ppt/media/"):
+                f.extract(file, path=os.path.join(unzip_path,L1[i]))
+
+# 对image.emf转png进行ocr
+import easyocr
+reader = easyocr.Reader(['en'], gpu = False) # need to run only once to load model into memory
+def ocr(picpath):
+    return reader.readtext(picpath, detail = 0)
+for i in range (3):
+    picpath1=os.path.join(r'your file path',L1[i],'ppt\media\image'+L3[i]+'.emf')
+    picpath2=os.path.join(r'your file path',L1[i],'ppt\media\image'+L3[i]+'.png')
+    Image.open(picpath1).save(picpath2)
+    list=ocr(picpath2)
+    sales=float(list[30])
+    margin=re.findall(r"\d+\.?\d*",list[52])
+    margin_rate=float(ssm[0])/100
+    profit=re.findall(r"\d+\.?\d*",list[113])
+    profit_delta=float(gcm[0])/100
+    #excel get data
+    data = load_workbook(r'your path here'+year+month1+'.xlsx',data_only=True)#对全表数值化
+    sheet=data['Sheet1']
+    sales2=float(sheet.cell(30+i*14,3).value)/1000
+    mar2=float(sheet.cell(39+i*14,3).value)
+    pro2=float(sheet.cell(39+i*14,3).value)-float(sheet.cell(33+i*14,3).value)
+
+    if -1<sales-sales2<1:
+        print(L1[i],'sales ok')
+    else:
+        print(L1[i],'sales wrong')
+    
+    if -0.05<margin_rate-mar2<0.05:
+        print(L1[i],'margin ok')
+    else:
+        print(L1[i],'margin wrong')
+     
+    if -0.05<profit_delta-pro2<0.05 or -0.05<profit_delta+pro2<0.05:
+        print(L1[i],'profit ok')
+    else:
+        print(L1[i],'profit wrong')
+
+
+
+
+
