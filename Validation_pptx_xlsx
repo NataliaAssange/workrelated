@@ -29,7 +29,7 @@ for i in range(3):
 import easyocr
 reader = easyocr.Reader(['en'], gpu = False) # need to run only once to load model into memory
 def ocr(picpath):
-    return reader.readtext(picpath, detail = 0)
+    return reader.readtext(picpath, min_size=0,width_ths=0.7,detail = 0)
 for i in range (3):
     picpath1=os.path.join(r'your file path',L1[i],'ppt\media\image'+L3[i]+'.emf')
     picpath2=os.path.join(r'your file path',L1[i],'ppt\media\image'+L3[i]+'.png')
