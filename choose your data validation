@@ -1,0 +1,13 @@
+Sub test()
+Dim ws As Worksheet
+For Each ws In ActiveWorkbook.Sheets
+If Cells(6, 4).Interior.Color = 16777215 Then
+Range(6, 4).Validation _
+ .Modify xlValidateList, xlValidAlertStop, _
+ xlBetween, "=INSTRUCTIONS!$H$5:$H$14"
+Range(6, 4) = "Sales"
+End If
+Next
+MsgBox ("ok")
+End Sub
+
